@@ -27,10 +27,11 @@ const apiLimiter = rateLimit({
 });
 app.use("/api/", apiLimiter);
 
-mongoose
-  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("MongoDB conectado"))
-  .catch((err) => console.error("Error al conectar MongoDB:", err));
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/index.html");
+});
 
 app.post("/api/register", async (req, res) => {
   const { username, email, password } = req.body;
@@ -64,7 +65,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 app.get("/api/auth/verify", (req, res) => {
-  const token = req.cookies.token;
+  const token = req.cookies?.token;
   if (!token) {
     return res.status(401).json({ message: "Usuario no autenticado" });
   }
