@@ -9,8 +9,8 @@ const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 const { MONGO_URI, JWT_SECRET } = require("./config");
 
-const User = require("./models/User");
-const Message = require("./models/Message");
+const User = require("./User");
+const Message = require("./Message");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
