@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masha - Plataforma de Mensajería</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="container">
+    <div id="register">
+      <h1>Registro</h1>
+      <form id="registerForm">
+        <input type="text" name="username" placeholder="Nombre de usuario" required>
+        <input type="email" name="email" placeholder="Correo electrónico" required>
+        <input type="password" name="password" placeholder="Contraseña (mínimo 6 caracteres)" required>
+        <div id="captcha-register" class="captcha">
+          <label id="captchaQuestion"></label>
+          <input type="number" id="captchaAnswer" placeholder="Respuesta" required>
+        </div>
+        <button type="submit">Registrarse</button>
+      </form>
+    </div>
+
+    <div id="login">
+      <h1>Iniciar Sesión</h1>
+      <form id="loginForm">
+        <input type="email" name="email" placeholder="Correo electrónico" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <div id="captcha-login" class="captcha">
+          <label id="captchaQuestionLogin"></label>
+          <input type="number" id="captchaAnswerLogin" placeholder="Respuesta" required>
+        </div>
+        <button type="submit">Iniciar sesión</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function generateCaptcha() {
+      const num1 = Math.floor(Math.random() * 10);
+      const num2 = Math.floor(Math.random() * 10);
+      const question = `${num1} + ${num2}`;
+      const answer = num1 + num2;
+      return { question, answer };
+    }
+
+    
+    const captchaRegister = generateCaptcha();
+    document.getElementById('captchaQuestion').textContent = `Resuelve: ${captchaRegister.question}`;
+
+    
+    const captchaLogin = generateCaptcha();
+    document.getElementById('captchaQuestionLogin').textContent = `Resuelve: ${captchaLogin.question}`;
+
+   
+    const registerForm = document.getElementById('registerForm');
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const captchaAnswer = parseInt(document.getElementById('captchaAnswer').value, 10);
+      if (captchaAnswer !== captchaRegister.answer) {
+        alert('El CAPTCHA es incorrecto. Intenta nuevamente.');
+        return;
+      }
+
+      const formData = new FormData(registerForm);
+      const data = Object.fromEntries(formData.entries());
+
+      if (data.password.length < 6 || !/[A-Z]/.test(data.password) || !/[a-z]/.test(data.password) || !/[0-9]/.test(data.password)) {
+        alert('La contraseña debe tener al menos 6 caracteres, incluir mayúsculas, minúsculas y números.');
+        return;
+      }
+
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        alert('Registro exitoso.');
+        window.location.href = '/home.html';
+      } else {
+        alert('Error al registrarse.');
+      }
+    });
+
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const captchaAnswerLogin = parseInt(document.getElementById('captchaAnswerLogin').value, 10);
+      if (captchaAnswerLogin !== captchaLogin.answer) {
+        alert('El CAPTCHA es incorrecto. Intenta nuevamente.');
+        return;
+      }
+
+      const formData = new FormData(loginForm);
+      const data = Object.fromEntries(formData.entries());
+
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const { token } = await response.json();
+        localStorage.setItem('authToken', token);
+        alert('Inicio de sesión exitoso.');
+        window.location.href = '/home.html';
+      } else {
+        alert('Error al iniciar sesión.');
+      }
+    });
+  </script>
+</body>
+</html>

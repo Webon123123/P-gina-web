@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Masha</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Masha-api.com</h1>
+    <p>By Team Ascend</p>
+  </header>
+
+  <div id="dashboard">
+    <div id="menu">
+      <button id="menuToggle">&#9776;</button>
+      <nav id="menuOptions">
+        <a href="/api.html">API</a>
+        <a href="/host.html">Host</a>
+        <a href="/bot.html">Bot</a>
+        <a href="/usuarios.html">Usuarios</a>
+      </nav>
+    </div>
+    
+    <div id="content">
+      <section id="intro">
+        <h1>Bienvenido a Masha-api.com</h1>
+        <p>En este sitio encontrarás:</p>
+        <ul>
+          <li>APIs útiles para tus proyectos</li>
+          <li>Información sobre AI Hoshino</li>
+          <li>Descuentos exclusivos en hosting</li>
+          <li>¡Y también mensajería!</li>
+        </ul>
+      </section>
+
+      <section class="dashboard-section">
+        <h2>Dashboard</h2>
+        <div class="card">
+          <h3>API</h3>
+          <p>Accede a diversas APIs que te ayudarán a mejorar tus proyectos.</p>
+        </div>
+        <div class="card">
+          <h3>Host</h3>
+          <p>Obtén descuentos en planes de hosting exclusivos para ti.</p>
+        </div>
+        <div class="card">
+          <h3>Bot</h3>
+          <p>Descubre cómo interactuar con nuestro bot para tareas automáticas.</p>
+        </div>
+        <div class="card">
+          <h3>Usuarios</h3>
+          <p>Consulta información sobre los usuarios registrados en la plataforma.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Masha-api.com - Todos los derechos reservados</p>
+  </footer>
+
+  <script>
+    async function checkAuthentication() {
+      try {
+        const response = await fetch('/api/auth/verify', { credentials: 'include' });
+        if (!response.ok) {
+          throw new Error('Usuario no autenticado');
+        }
+      } catch (error) {
+        alert('No tienes acceso a esta página. Por favor, inicia sesión.');
+        window.location.href = '/index.html';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkAuthentication();
+
+      const menuToggle = document.getElementById('menuToggle');
+      const menuOptions = document.getElementById('menuOptions');
+
+      menuToggle.addEventListener('click', () => {
+        menuOptions.classList.toggle('visible');
+      });
+    });
+  </script>
+</body>
+</html>
