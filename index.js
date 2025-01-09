@@ -1,15 +1,16 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const multer = require("multer");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const formidable = require("formidable");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 const { MONGO_URI, JWT_SECRET } = require("./config");
 
-const User = require("./User");
-const Message = require("./Message");
+const User = require("./models/User");
+const Message = require("./models/Message");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,26 +32,19 @@ mongoose
   .then(() => console.log("MongoDB conectado"))
   .catch((err) => console.error("Error al conectar MongoDB:", err));
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "./public/uploads"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
-const upload = multer({ storage });
-
-
 app.post("/api/register", async (req, res) => {
   const { username, email, password } = req.body;
   const userIp = req.ip;
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    const newUser = new User({ username, email, password, ip: userIp });
+    const newUser = new User({ username, email, password: hashedPassword, ip: userIp });
     await newUser.save();
     res.status(201).json({ message: "Usuario registrado" });
   } catch (err) {
     res.status(500).json({ error: "Error al registrar usuario" });
   }
 });
-
 
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
@@ -69,7 +63,6 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-
 app.get("/api/auth/verify", (req, res) => {
   const token = req.cookies.token;
   if (!token) {
@@ -84,7 +77,6 @@ app.get("/api/auth/verify", (req, res) => {
   });
 });
 
-
 app.post("/api/messages", async (req, res) => {
   const { token, content, media } = req.body;
 
@@ -98,9 +90,18 @@ app.post("/api/messages", async (req, res) => {
   }
 });
 
+app.post("/api/upload", (req, res) => {
+  const form = new formidable.IncomingForm();
+  form.uploadDir = "./public/uploads";
+  form.keepExtensions = true;
 
-app.post("/api/upload", upload.single("file"), (req, res) => {
-  res.status(200).json({ filePath: `/uploads/${req.file.filename}` });
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al subir archivo" });
+    }
+    const filePath = `/uploads/${files.file[0].newFilename}`;
+    res.status(200).json({ filePath });
+  });
 });
 
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
