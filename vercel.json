@@ -7,8 +7,8 @@
     }
   ],
   "env": {
-    "MONGO_URI": "@mongo_uri",
-    "JWT_SECRET": "@jwt_secret",
-    "RECAPTCHA_SECRET": "@recaptcha_secret"
+    "MONGO_URI": "mongodb+srv://Masha:<db_password>@database.ufahr.mongodb.net/?retryWrites=true&w=majority&appName=Database",
+    "JWT_SECRET": "supersecretkey",
+    "RECAPTCHA_SECRET": "your-recaptcha-secret-here"
   }
 }
